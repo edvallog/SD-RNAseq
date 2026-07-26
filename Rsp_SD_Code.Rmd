@@ -22,6 +22,7 @@ library(clusterProfiler)
 library(org.Dm.eg.db)
 library(ReactomePA)
 library(stringr)
+library(clipr)
 ```
 
 # Load custom functions
@@ -143,7 +144,7 @@ if (is.null(batch) || length(unique(batch)) == 1 ) {
   ) 
   ggsave(paste0(plotPrefix, "_PCA.pdf"), width = plotWidth, height = plotHeight, bg = "transparent")
 #########Add Symbols and Chromosome to DE Result#########
-  if (TYPE == "totRNA") {
+  if (TYPE == "totRNA" | TYPE == "DGE") {
   CHR <- AnnotationDbi::select(org.Dm.eg.db, keys = fullTable$Name, columns = "CHR", keytype = "FLYBASE")
   SYMBOL <- bitr(fullTable$Name, fromType = "FLYBASE", toType = "SYMBOL", OrgDb = "org.Dm.eg.db")
   fullTable <- merge(fullTable, SYMBOL, by.x = "Name", by.y = "FLYBASE", all.x = TRUE)
@@ -158,7 +159,7 @@ if (is.null(batch) || length(unique(batch)) == 1 ) {
   sigGenes <- fullTable[!is.na(fullTable$p.Adj) & fullTable$p.Adj <= 0.01, ]
   sigGenes <- sigGenes[order(abs(sigGenes$LogFC), decreasing = TRUE), ]
 
-  if (!TYPE %in% c("totRNA")) {
+  if (!TYPE %in% c("totRNA", "DGE")) {
     sigGenes <- sigGenes[!grepl("^FBgn", sigGenes$Name), ]
     fullTable$delabel <- ifelse(fullTable$Name %in% head(sigGenes$Name, n = 5),
                               fullTable$Name, NA)
@@ -169,7 +170,7 @@ if (is.null(batch) || length(unique(batch)) == 1 ) {
   fullTable$diffexpressed_labeled <- fullTable$diffexpressed
   fullTable$diffexpressed_labeled[fullTable$diffexpressed %in% c("UP", "DOWN") & !is.na(fullTable$delabel)] <- "Interesting"
   
-  write_tsv(na.omit(fullTable[fullTable$p.Adj <= 0.01 & abs(fullTable$LogFC) >= 0.5,1:6]), paste0("supplementalTables/", plotPrefix, "_DE.tsv"))
+  write_tsv(na.omit(fullTable[fullTable$p.Adj <= 0.05,1:6]), paste0("supplementalTables/", plotPrefix, "_DE.tsv"))
 ###########Make Volcano Plot##########################
   print(ggplot(data = fullTable, aes(x = LogFC, y = -log10(p.Adj), col = diffexpressed_labeled, label = delabel)) +
     geom_vline(xintercept = c(0,0), col = "black", linetype = 'dashed', size = 2) +
@@ -252,6 +253,6 @@ ggsave(paste0(dotplotprefix, "_PANGEA_DotPlot.pdf"), width = plotWidth, height =
 }
 
 extractCPM <- function(readTable, element) {
-  readTable$V2[grepl(element, readTable$V1) == TRUE] / (sum(readTable$V2)/1000000)
+  readTable$V2[grepl(element, readTable$V1)] / (sum(readTable$V2)/1000000)
 }
 ```

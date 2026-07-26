@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Figure 1B
+# Old Figure 1B
 
 ```{r}
 # CPM graph for Rsp smRNAs
@@ -39,31 +39,213 @@ SD5_5 <- read.table("smRNA_counts/all_summedbyFam/SD5_Iso1_2_S15_R1_001.out_fam"
 SD5_6 <- read.table("smRNA_counts/all_summedbyFam/SD5_Iso1_3_S16_R1_001.out_fam")
 
 element <- "Rsp"
-R16_CPM <- mean(extractCPM(R16_1, element), extractCPM(R16_2, element), extractCPM(R16_3, element),extractCPM(R16_4, element),extractCPM(R16_5, element),extractCPM(R16_6, element))
+R16_CPM <- mean(c(extractCPM(R16_1, element), extractCPM(R16_2, element), extractCPM(R16_3, element),extractCPM(R16_4, element),extractCPM(R16_5, element),extractCPM(R16_6, element)))
 R16_StD <- sd(c(extractCPM(R16_1, element), extractCPM(R16_2, element), extractCPM(R16_3, element),extractCPM(R16_4, element),extractCPM(R16_5, element),extractCPM(R16_6, element)))
-SDMad_CPM <- mean(extractCPM(SDMad_1, element), extractCPM(SDMad_2, element), extractCPM(SDMad_3, element), extractCPM(SDMad_4), extractCPM(SDMad_5), extractCPM(SDMad_6))
+SDMad_CPM <- mean(c(extractCPM(SDMad_1, element), extractCPM(SDMad_2, element), extractCPM(SDMad_3, element), extractCPM(SDMad_4, element), extractCPM(SDMad_5, element), extractCPM(SDMad_6, element)))
 SDMad_StD <- sd(c(extractCPM(SDMad_1, element), extractCPM(SDMad_2, element), extractCPM(SDMad_3, element), extractCPM(SDMad_4, element), extractCPM(SDMad_5, element), extractCPM(SDMad_6, element)))
-SDRev_CPM <- mean(extractCPM(SDRev_1, element), extractCPM(SDRev_2, element), extractCPM(SDRev_3, element), extractCPM(SDRev_4, element), extractCPM(SDRev_5, element), extractCPM(SDRev_6, element))
+SDRev_CPM <- mean(c(extractCPM(SDRev_1, element), extractCPM(SDRev_2, element), extractCPM(SDRev_3, element), extractCPM(SDRev_4, element), extractCPM(SDRev_5, element), extractCPM(SDRev_6, element)))
 SDRev_StD <- sd(c(extractCPM(SDRev_1, element), extractCPM(SDRev_2, element), extractCPM(SDRev_3, element), extractCPM(SDRev_4, element), extractCPM(SDRev_5, element), extractCPM(SDRev_6, element)))
-SD5_CPM <- mean(extractCPM(SD5_1, element), extractCPM(SD5_2, element), extractCPM(SD5_3, element), extractCPM(SD5_4, element), extractCPM(SD5_5, element), extractCPM(SD5_6, element))
+SD5_CPM <- mean(c(extractCPM(SD5_1, element), extractCPM(SD5_2, element), extractCPM(SD5_3, element), extractCPM(SD5_4, element), extractCPM(SD5_5, element), extractCPM(SD5_6, element)))
 SD5_StD <- sd(c(extractCPM(SD5_1, element), extractCPM(SD5_2, element), extractCPM(SD5_3, element), extractCPM(SD5_4, element), extractCPM(SD5_5, element), extractCPM(SD5_6, element)))
 
 data <- data.frame(Group = c("R16/Iso1", "SDMad/Iso1", "SDRev/Iso1","SD5/Iso1"), Mean = c(R16_CPM, SDMad_CPM, SDRev_CPM, SD5_CPM), STDev = c(R16_StD, SDMad_StD, SDRev_StD, SD5_StD))
 
 data$Group <- factor(data$Group, levels = c("R16/Iso1", "SDMad/Iso1", "SDRev/Iso1","SD5/Iso1"))
 
+point_Data <- data.frame(Group = rep(c("R16/Iso1", "SDMad/Iso1", "SDRev/Iso1", "SD5/Iso1"), each = 6), 
+                         CPM = c(
+                           extractCPM(R16_1, element), extractCPM(R16_2, element), extractCPM(R16_3, element),extractCPM(R16_4, element),extractCPM(R16_5, element),extractCPM(R16_6, element),
+                           extractCPM(SDMad_1, element), extractCPM(SDMad_2, element), extractCPM(SDMad_3, element), extractCPM(SDMad_4, element), extractCPM(SDMad_5, element), extractCPM(SDMad_6, element),
+                           extractCPM(SDRev_1, element), extractCPM(SDRev_2, element), extractCPM(SDRev_3, element), extractCPM(SDRev_4, element), extractCPM(SDRev_5, element), extractCPM(SDRev_6, element),
+                           extractCPM(SD5_1, element), extractCPM(SD5_2, element), extractCPM(SD5_3, element), extractCPM(SD5_4, element), extractCPM(SD5_5, element), extractCPM(SD5_6, element)))
+
+point_Data$Group <- factor(point_Data$Group, levels = c("R16/Iso1","SDMad/Iso1","SDRev/Iso1","SD5/Iso1"))
+
 upper <- data$Mean + data$STDev
 lower <- data$Mean - data$STDev
 
 ggplot(data, aes(y = Mean, fill = Group)) +
     geom_bar(aes(x = Group, y = Mean), stat = "identity", width = 0.6) +
+    geom_point(data = point_Data,
+           aes(x = Group, y = CPM),
+           position = position_jitter(width = 0.08),
+           size = 3,
+           color = "black") +
     scale_fill_manual(values=c("gray", "seagreen", "darkgoldenrod2", "dodgerblue3")) +
     geom_errorbar(aes(x = Group, ymin = lower, ymax = upper), width = 0.1) +
     labs(x = NULL, y = "Mean CPM ± StDev") +
     theme_classic() +
     theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
 
-ggsave("smRNA_CPMPlot_Iso1.pdf", width = 10, height = 6, units = c("in"), bg = "transparent")
+TukeyHSD(aov(CPM ~ Group, data = point_Data))
+
+ggsave("smRNA_CPMPlot_Iso1.pdf", width = 6, height = 6, units = c("in"), bg = "transparent")
+```
+
+# NEW FIG 1B
+```{r}
+FC_Points_SDMad <- normCounts_SDMad_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMad_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SDMad <- data.frame(Group = c(rep("R16/Iso1(MAD)", 6), rep("SDMad/Iso1", 6)),
+                              Count = as.numeric(FC_Points_SDMad[1,]))
+
+FC_Points_SDRev <- normCounts_SDMadRev_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMadRev_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SDRev <- data.frame(Group = c(rep("SDRev/Iso1", 6), rep("R16/Iso1(REV)", 5)),
+                              Count = as.numeric(FC_Points_SDRev[1,]))
+
+FC_Points_SD5 <- normCounts_SD5_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SD5_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SD5 <- data.frame(Group = c(rep("R16/Iso1(SD5)", 3), rep("SD5/Iso1", 3)),
+                              Count = as.numeric(FC_Points_SD5[1,]))
+
+
+points <- bind_rows(
+  FC_Points_SDMad,
+  FC_Points_SDRev,
+  FC_Points_SD5
+)
+
+points$Pair <- rep(c("SDMad","SDRev","SD5"),
+                   times = c(nrow(FC_Points_SDMad),
+                             nrow(FC_Points_SDRev),
+                             nrow(FC_Points_SD5)))
+
+points$Pair <- factor(points$Pair, levels=c("SDMad","SDRev","SD5"))
+points$Group <- factor(points$Group,
+                       levels=c("R16/Iso1(MAD)","SDMad/Iso1",
+                                "R16/Iso1(REV)","SDRev/Iso1",
+                                "R16/Iso1(SD5)","SD5/Iso1"))
+
+summary_df <- points |>
+  dplyr::group_by(Pair, Group) |>
+  dplyr::summarise(
+    Mean = mean(Count),
+    SD = sd(Count),
+    .groups="drop"
+  )
+
+summary_df$Group <- factor(summary_df$Group,
+                           levels = c("R16/Iso1(MAD)","SDMad/Iso1",
+                                      "R16/Iso1(REV)","SDRev/Iso1",
+                                      "R16/Iso1(SD5)","SD5/Iso1"))
+
+points$Group <- factor(points$Group,
+                       levels = levels(summary_df$Group))
+
+summary_Mad <- summary_df[grepl("Mad", summary_df$Pair) == TRUE, ]
+summary_Rev <- summary_df[grepl("Rev", summary_df$Pair) == TRUE, ]
+summary_5 <- summary_df[grepl("SD5", summary_df$Pair) == TRUE, ]
+
+points_Mad <- points[grepl("Mad", points$Pair) == TRUE, ]
+points_Rev <- points[grepl("Rev", points$Pair) == TRUE, ]
+points_5 <- points[grepl("SD5", points$Pair) == TRUE, ]
+
+ggplot(summary_Mad, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_Mad,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("gray","seagreen")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot_SDMad_Iso1.pdf", width = 8, height = 6, units = c("in"), bg = "transparent")
+
+ggplot(summary_Rev, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_Rev,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("gray","darkgoldenrod2")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot_SDRev_Iso1.pdf", width = 8, height = 6, units = c("in"), bg = "transparent")
+
+ggplot(summary_5, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_5,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("gray","dodgerblue3")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot_SD5_Iso1.pdf", width = 8, height = 6, units = c("in"), bg = "transparent")
+```
+# Alternate Figure 1B
+```{r}
+FC_Points_SDMad <- normCounts_SDMad_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMad_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SDMad <- data.frame(Group = c(rep("R16/Iso1", 6), rep("SDMad/Iso1", 6)),
+                              Count = as.numeric(FC_Points_SDMad[1,]))
+
+average_FC_SDMad <- -(1 - (mean(c(FC_Points_SDMad[FC_Points_SDMad$Group == "SDMad/Iso1",2])) / mean(c(FC_Points_SDMad[FC_Points_SDMad$Group == "R16/Iso1",2]))))
+
+FC_Points_SDRev <- normCounts_SDMadRev_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMadRev_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SDRev <- data.frame(Group = c(rep("SDRev/Iso1", 6), rep("R16/Iso1", 5)),
+                              Count = as.numeric(FC_Points_SDRev[1,]))
+
+average_FC_SDRev <- -(1 - (mean(c(FC_Points_SDRev[FC_Points_SDRev$Group == "SDRev/Iso1",2])) / mean(c(FC_Points_SDRev[FC_Points_SDRev$Group == "R16/Iso1",2]))))
+
+FC_Points_SD5 <- normCounts_SD5_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SD5_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SD5 <- data.frame(Group = c(rep("R16/Iso1", 3), rep("SD5/Iso1", 3)),
+                              Count = as.numeric(FC_Points_SD5[1,]))
+
+average_FC_SD5 <- -(1 - (mean(c(FC_Points_SD5[FC_Points_SD5$Group == "SD5/Iso1",2])) / mean(c(FC_Points_SD5[FC_Points_SD5$Group == "R16/Iso1",2]))))
+
+Means <- c(average_FC_SDMad, average_FC_SDRev, average_FC_SD5)
+
+StD_SDMad <- sd(-(1 - (c(FC_Points_SDMad[FC_Points_SDMad$Group == "SDMad/Iso1",2])) / mean(c(FC_Points_SDMad[FC_Points_SDMad$Group == "R16/Iso1",2]))))
+StD_SDRev <- sd(-(1 - (c(FC_Points_SDRev[FC_Points_SDRev$Group == "SDRev/Iso1",2])) / mean(c(FC_Points_SDRev[FC_Points_SDRev$Group == "R16/Iso1",2]))))
+StD_SD5 <- sd(-(1 - (c(FC_Points_SD5[FC_Points_SD5$Group == "SD5/Iso1",2])) / mean(c(FC_Points_SD5[FC_Points_SD5$Group == "R16/Iso1",2]))))
+
+StDs <- c(StD_SDMad, StD_SDRev, StD_SD5)
+
+data <- data.frame(Group = c("SDMad/Iso1", "SDRev/Iso1", "SD5/Iso1"), Mean = Means, STDev = StDs)
+
+data$Group <- factor(data$Group, levels = c("SDMad/Iso1", "SDRev/Iso1","SD5/Iso1"))
+
+upper <- data$Mean + data$STDev
+lower <- data$Mean - data$STDev
+
+ggplot(data, aes(y = Mean, fill = Group)) +
+    geom_bar(aes(x = Group, y = Mean), stat = "identity", width = 0.6) +
+    scale_fill_manual(values=c("seagreen", "darkgoldenrod2", "dodgerblue3")) +
+    geom_errorbar(aes(x = Group, ymin = lower, ymax = upper), width = 0.1) +
+    labs(x = NULL, y = "% Change ± StDev") +
+    theme_classic() +
+    geom_hline(yintercept = 0) +
+    theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot.pdf", width = 10, height = 6, units = c("in"), bg = "transparent")
 ```
 
 # Figure 1C
@@ -91,6 +273,8 @@ df_long <- gene_data %>%
     by = c("Gene", "Condition")
   ) %>%
   mutate(sig = case_when(p.Adj <= 0.001 ~ "***",p.Adj <= 0.01  ~ "**",p.Adj <= 0.05  ~ "*",TRUE ~ ""))
+
+
 
 ggplot(df_long, aes(x = Gene, y = Condition, fill = logFC)) +
   geom_tile(color = "white") +
@@ -176,6 +360,8 @@ plotData <- plotData %>%
     padj <= 0.05  ~ "*",
     TRUE ~ ""
   ))
+
+write_tsv(plotData, "supplementalTables/TableS3.tsv")
 
 ggplot(plotData, aes(x = condition, y = Module, fill = difference)) +
   geom_tile(color = "white") +
@@ -323,7 +509,26 @@ ggplot(long_data, aes(x = genotype, y = K_Val, fill = genotype)) +
   theme_classic() +
   theme(legend.position = "none", axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.x = element_blank())
 
-ggsave("Iso1_KipKO_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
+ggsave("SDMad_Iso1_KipKO_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
+
+
+data <- data.frame(
+  Homozygote = c(0.951456311,0.906403941,0.955223881,0.917355372,0.968992248,0.985714286,0.986111111,0.824175824),
+  Heterozygote = c(1,0.996212121,1,1)
+)
+
+long_data <- pivot_longer(data, cols = everything(), names_to = "genotype", values_to = "K_Val")
+
+long_data$genotype <- factor(long_data$genotype, levels = c("Heterozygote", "Homozygote"))
+
+ggplot(long_data, aes(x = genotype, y = K_Val, fill = genotype)) +
+  geom_boxplot(outlier.shape = 21, outlier.fill = "white", outlier.color = "black") +
+  scale_fill_manual(values = c("darkgrey", "dodgerblue3")) +
+  scale_y_continuous(limits = c(0.5,1)) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.x = element_blank())
+
+ggsave("SD5_Iso1_KipKO_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
 ```
 
 #Figure 4B
@@ -379,7 +584,7 @@ ggplot(df_long, aes(x = Gene, y = Condition, fill = logFC)) +
 ggsave("smRNA_HeatPlot_RspOE.pdf", width = 10, height = 5, bg = "transparent")
 ```
 
-#Figure 4C
+#Old Figure 4C
 
 ```{r}
 SDMad_1 <- read.table("smRNA_counts/all_summedbyFam/SDMad_Iso1_new_1_R1.out_fam")
@@ -447,6 +652,96 @@ ggplot(df_long, aes(x = Condition, y = Value, fill = BarColor)) +
 ggsave("rspOE_smRNACounts_DESeq2.pdf", width = 10, height = 6, bg = "transparent")
 ```
 
+# New Figure 4C
+
+```{r}
+OE_Points_SDMad <- normCounts_SDMad_RspOE_SDMad_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMad_RspOE_SDMad_Iso1_smRNA)) == TRUE,]
+OE_Points_SDMad <- data.frame(Group = c(rep("SDMad/Iso1", 3), rep("SDMad/RspOE", 3)),
+                              Count = as.numeric(OE_Points_SDMad[1,]))
+
+OE_Points_SD5 <- normCounts_SD5_RspOE_SD5_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SD5_RspOE_SD5_Iso1_smRNA)) == TRUE,]
+OE_Points_SD5 <- data.frame(Group = c(rep("SD5/Iso1", 3), rep("SD5/RspOE", 3)),
+                              Count = as.numeric(OE_Points_SD5[1,]))
+
+
+points <- bind_rows(
+  OE_Points_SDMad,
+  OE_Points_SD5
+)
+
+points$Pair <- rep(c("SDMad","SD5"),
+                   times = c(nrow(OE_Points_SDMad),
+                             nrow(OE_Points_SD5)))
+
+points$Pair <- factor(points$Pair, levels=c("SDMad","SD5"))
+points$Group <- factor(points$Group,
+                       levels=c("SDMad/Iso1","SDMad/RspOE",
+                                "SD5/Iso1","SD5/RspOE"))
+
+summary_df <- points |>
+  dplyr::group_by(Pair, Group) |>
+  dplyr::summarise(
+    Mean = mean(Count),
+    SD = sd(Count),
+    .groups="drop"
+  )
+
+summary_df$Group <- factor(summary_df$Group,
+                           levels = c("SDMad/Iso1","SDMad/RspOE",
+                                      "SD5/Iso1","SD5/RspOE"))
+
+points$Group <- factor(points$Group,
+                       levels = levels(summary_df$Group))
+
+summary_Mad <- summary_df[grepl("Mad", summary_df$Pair) == TRUE, ]
+summary_5 <- summary_df[grepl("SD5", summary_df$Pair) == TRUE, ]
+
+points_Mad <- points[grepl("Mad", points$Pair) == TRUE, ]
+points_5 <- points[grepl("SD5", points$Pair) == TRUE, ]
+
+ggplot(summary_Mad, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_Mad,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("seagreen","seagreen3")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("rspOE_smRNACounts_SDMad_DESeq2.pdf", width = 6, height = 6, bg = "transparent")
+
+ggplot(summary_5, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_5,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("dodgerblue3","cornflowerblue")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("rspOE_smRNACounts_SD5_DESeq2.pdf", width = 6, height = 6, bg = "transparent")
+```
+
 # Figure 4D
 
 ```{r}
@@ -490,9 +785,97 @@ ggplot(data, aes(x = Genotype, y = kValues, fill = Genotype)) +
 ggsave("SD5_RspOE_cyoglaIII_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
 ```
 
+# Supplemental Figure 1A
+
+```{r}
+FC_Points_SDMad <- normCounts_SDMad_R16_Gla_smRNA[grepl("Rsp", rownames(normCounts_SDMad_R16_Gla_smRNA)) == TRUE,]
+FC_Points_SDMad <- data.frame(Group = c(rep("R16/Gla(MAD)", 3), rep("SDMad/Gla", 3)),
+                              Count = as.numeric(FC_Points_SDMad[1,]))
+
+FC_Points_SD5 <- normCounts_SD5_R16_Gla_smRNA[grepl("Rsp", rownames(normCounts_SD5_R16_Gla_smRNA)) == TRUE,]
+FC_Points_SD5 <- data.frame(Group = c(rep("R16/Gla(SD5)", 3), rep("SD5/Gla", 3)),
+                              Count = as.numeric(FC_Points_SD5[1,]))
 
 
-# Supplemental Figure 1
+points <- bind_rows(
+  FC_Points_SDMad,
+  FC_Points_SD5
+)
+
+points$Pair <- rep(c("SDMad","SD5"),
+                   times = c(nrow(FC_Points_SDMad),
+                             nrow(FC_Points_SD5)))
+
+points$Pair <- factor(points$Pair, levels=c("SDMad","SD5"))
+points$Group <- factor(points$Group,
+                       levels=c("R16/Gla(MAD)","SDMad/Gla",
+                                "R16/Gla(SD5)","SD5/Gla"))
+
+summary_df <- points |>
+  dplyr::group_by(Pair, Group) |>
+  dplyr::summarise(
+    Mean = mean(Count),
+    SD = sd(Count),
+    .groups="drop"
+  )
+
+summary_df$Group <- factor(summary_df$Group,
+                           levels = c("R16/Gla(MAD)","SDMad/Gla",
+                                      "R16/Gla(SD5)","SD5/Gla"))
+
+points$Group <- factor(points$Group,
+                       levels = levels(summary_df$Group))
+
+summary_Mad <- summary_df[grepl("Mad", summary_df$Pair) == TRUE, ]
+summary_5 <- summary_df[grepl("SD5", summary_df$Pair) == TRUE, ]
+
+points_Mad <- points[grepl("Mad", points$Pair) == TRUE, ]
+points_5 <- points[grepl("SD5", points$Pair) == TRUE, ]
+
+ggplot(summary_Mad, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_Mad,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("gray","seagreen")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot_SDMad_Gla.pdf", width = 8, height = 6, units = c("in"), bg = "transparent")
+
+ggplot(summary_5, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_5,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("gray","dodgerblue3")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot_SD5_Gla.pdf", width = 8, height = 6, units = c("in"), bg = "transparent")
+```
+
+# Supplemental Figure 1B
 
 ```{r}
 piRNALoci <- c("Rsp", "1pt688","piRNA_cluster_38C2", "piRNA_cluster_38C1", "piRNA_cluster_flamenco", "piRNA_cluster_80F", "piRNA_cluster_20A", "piRNA_cluster_42AB")
@@ -695,54 +1078,48 @@ ggsave("individualization_HeatPlot_Iso1_Supplement.pdf", width = 25, height = 6,
 ```{r}
 SDMad_R16_Gla_TEs <- SDMad_R16_totRNA_Repeats_Gla[grepl("^FBgn", SDMad_R16_totRNA_Repeats_Gla$Name) == FALSE & grepl("SAT|Rsp|1pt688|luster|sland|rDNA|AT-ChX|Low_complexity|Simple_repeat|Satellite",SDMad_R16_totRNA_Repeats_Gla$Name) == FALSE,]
 SDMad_R16_Gla_TEs <- SDMad_R16_Gla_TEs[c(1,3,5)]
+SDMad_R16_Gla_TEs$Genotype <- rep("SDMad", length(SDMad_R16_Gla_TEs$Name))
 
 SDMad_R16_Iso1_TEs <- SDMad_R16_totRNA_Repeats_Iso1[grepl("^FBgn", SDMad_R16_totRNA_Repeats_Iso1$Name) == FALSE & grepl("SAT|Rsp|1pt688|sland|rDNA|AT-ChX|Low_complexity|Simple_repeat|Satellite",SDMad_R16_totRNA_Repeats_Iso1$Name) == FALSE,]
 SDMad_R16_Iso1_TEs <- SDMad_R16_Iso1_TEs[c(1,3,5)]
 
-SD5_R16_Gla_TEs <- SD5_R16_totRNA_Repeats_Gla[grepl("^FBgn", SD5_R16_totRNA_Repeats_Gla$Name) == FALSE & grepl("SAT|Rsp|1pt688|sland|rDNA|AT-ChX|Low_complexity|Simple_repeat|Satellite",SD5_R16_totRNA_Repeats_Gla$Name) == FALSE,]
+SD5_R16_Gla_TEs <- SD5_R16_totRNA_Repeats_Gla[grepl("^FBgn", SD5_R16_totRNA_Repeats_Gla$Name) == FALSE & grepl("SAT|Rsp|1pt688|luster|sland|rDNA|AT-ChX|Low_complexity|Simple_repeat|Satellite",SD5_R16_totRNA_Repeats_Gla$Name) == FALSE,]
 SD5_R16_Gla_TEs <- SD5_R16_Gla_TEs[c(1,3,5)]
+SD5_R16_Gla_TEs$Genotype <- rep("SD5", length(SD5_R16_Gla_TEs$Name))
+
+plotData <- rbind(SDMad_R16_Gla_TEs, SD5_R16_Gla_TEs)
 
 TE_Fams <- read.table("TE_Families.tsv")
 TE_Fams <- data.frame(Name = TE_Fams$V1, Family = TE_Fams$V2)
 
-
-plotData <- merge(SDMad_R16_Gla_TEs, SD5_R16_Gla_TEs, by = "Name")
-
-colnames(plotData) <- c("Name", "LogFC_SDMad", "p.adj_SDMad", "LogFC_SD5", "p.adj_SD5")
-
-df_long_plotData <- plotData %>%
-  pivot_longer(
-    cols = starts_with("LogFC"),
-    names_to = "Genotype",
-    values_to = "LogFC"
-  ) %>%
-  mutate(Genotype = sub("LogFC_", "", Genotype)) %>%
-  pivot_longer(
-    cols = starts_with("p.adj"),
-    names_to = "Genotype_p",
-    values_to = "p.adj"
-  ) %>%
+plotData <- plotData %>%
   mutate(
-    Genotype_p = sub("p.adj_", "", Genotype_p),
-    p.adj = as.numeric(p.adj)
-  ) %>%
-  filter(Genotype == Genotype_p) %>%
-  dplyr::select(Name, Genotype, LogFC, p.adj) %>%  # <-- keep Family here
-  mutate(
-    sig = ifelse(p.adj <= 0.01, 1, 0)
-  )
+    sig = case_when(
+      p.Adj <= 0.0001 ~ "***",
+      p.Adj <= 0.001  ~ "**",
+      p.Adj <= 0.01   ~ "*",
+      TRUE ~ ""))
 
-ggplot(df_long_plotData, aes(x = Name, y = Genotype, fill = as.factor(sig))) +
+ggplot(plotData, aes(x = Name, y = Genotype, fill = LogFC)) +
   geom_tile(color = "grey80") +
-  scale_fill_manual(values = c("0" = "white", "1" = "black")) +
-  theme_minimal(base_size = 16) +
+  geom_text(aes(label = sig), size = 5) +
+  scale_fill_gradient2(
+    low = "dodgerblue3",
+    mid = "white",
+    high = "red2",
+    midpoint = 0,
+    limits=c(-1,1),
+    oob=scales::squish,
+    name = "Log2FC"
+  ) +
   scale_y_discrete(labels = c(
     "SDMad" = "SDMad/Gla",
-    "SD5" = "SD5/Gla"
-  )) +
-  theme(axis.text.y = element_text(size = 20), axis.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1, size = 16, face = "italic"), legend.position = "none") 
+    "SD5" = "SD5/Gla")) +
+  theme_minimal(base_size = 16) +
+  theme(axis.text.y = element_text(size = 20),axis.title = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1, size = 16, face = "italic"))
 
- ggsave("TE_Heatplot.pdf", width = 12, height = 5, bg = "transparent")
+ggsave("TEs_HeatPlot_Gla.pdf", width = 10, height = 4, bg = "transparent")
+
 ```
 
 # Supplemental Figure 7A
@@ -759,7 +1136,43 @@ SD5vR16_Gla_DotPlotData <- read_csv("PANGEA_Results/SD5vR16_Gla_PANGEA.csv")
 WGCNA_PangeaDotPlot(SD5vR16_Gla_DotPlotData, dotplotprefix = "SD5vR16_Gla", numSets = 15)
 ```
 
-# Supplemental Figure 9B
+# Supplemental Figure 8
+
+```{r}
+top20_Symbols <- top20$SYMBOL
+
+gene_data <- data.frame(
+  Gene = top20_Symbols, 
+  logFC_DGE = SDMad_SDRev_DGE_Iso1$LogFC[match(top20_Symbols, SDMad_SDRev_DGE_Iso1$SYMBOL)], logFC_totRNA = SDMad_SDRev_totRNA_Iso1$LogFC[match(top20_Symbols, SDMad_SDRev_totRNA_Iso1$SYMBOL)], 
+  p.Adj_DGE = SDMad_SDRev_DGE_Iso1$p.Adj[match(top20_Symbols, SDMad_SDRev_DGE_Iso1$SYMBOL)], p.Adj_totRNA = SDMad_SDRev_totRNA_Iso1$p.Adj[match(top20_Symbols, SDMad_SDRev_totRNA_Iso1$SYMBOL)])
+
+df_long <- gene_data %>%
+  pivot_longer(cols = starts_with("logFC"),
+               names_to = "Condition",
+               values_to = "logFC") %>%
+  mutate(Condition = sub("logFC_", "", Condition)) %>%
+  left_join(
+    gene_data %>%
+      pivot_longer(cols = starts_with("p.Adj"),
+                   names_to = "Condition_p",
+                   values_to = "p.Adj") %>%
+      mutate(Condition = sub("p.Adj_", "", Condition_p)) %>%
+      dplyr::select(Gene, Condition, p.Adj),
+    by = c("Gene", "Condition")
+  ) %>%
+  mutate(sig = case_when(p.Adj <= 0.001 ~ "***",p.Adj <= 0.01  ~ "**",p.Adj <= 0.05  ~ "*",TRUE ~ ""))
+
+ggplot(df_long, aes(x = Condition, y = Gene, fill = logFC)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = sig), color = "black", size = 5) +
+  scale_fill_gradient2(low = "dodgerblue3", mid = "white", high = "red2", midpoint = 0, limits = c(-5, 5), oob = scales::squish, name = "Log2FC") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title = element_blank(), legend.text = element_text(size = 15), legend.title = element_text(size = 15))
+
+ggsave("DGE_totRNA_HeatPlot.pdf", width = 6, height = 5, bg = "transparent")
+```
+
+# Supplemental Figure 10B
 
 ```{r}
 # piRNA Gene Relative Expression
@@ -793,7 +1206,7 @@ ggplot(data, aes(y = TPM, fill = Group)) +
 ggsave("piRNAGene_TPM.pdf", width = 8, height = 4, bg = "transparent")
 ```
 
-# Supplemental Figure 9D
+# Supplemental Figure 10D
 
 ```{r}
 # Kip RT Barplot
@@ -818,7 +1231,7 @@ data <- data.frame(Genotype = c("Ral309_Ovary", "KipKO_Ovary", "Ral309_Testis","
 ggsave("KipRT_Quant.pdf", width = 4, height = 6, bg = "transparent")
 ```
 
-# Supplemental Figure 9E
+# Supplemental Figure 10E
 
 ```{r}
 kipferl <- read.table("smRNA_counts/Baumgartner_2024/KipferlMutant.out_fam")
@@ -836,14 +1249,14 @@ data <- data.frame(Group = c("Kipferl", "Rhino G31D", "W1118"), CPM = c(kip_CPM,
 ggplot(data, aes(y = CPM, fill = Group)) +
   geom_bar(aes(x = Group, y = CPM), stat = "identity", width = 0.6) +
   scale_fill_manual(values=c("navy", "limegreen", "darkred")) +
-  labs(x = NULL, y = "CPM") +
+  labs(x = NULL, y = "TPM") +
   theme_classic() +
   theme(legend.position = "none", axis.text.x = element_text(size = 15, face = "italic"), axis.text.y = element_text(size = 12), axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20), legend.text = element_text(size = 15))
 
 ggsave("Baumgartner_1pt688.pdf", width = 4, height = 4, bg = "transparent")
 ```
 
-# Supplemental Figure 9F
+# Supplemental Figure 10F
 
 ```{r}
 kipferl <- read.table("smRNA_counts/Baumgartner_2024/KipferlMutant.out_fam")
@@ -989,6 +1402,96 @@ ggplot(df_long, aes(x = Condition, y = Value, fill = BarColor)) +
 ggsave("rspOE-dsRed_smRNACounts_DESeq2.pdf", width = 10, height = 6, bg = "transparent")
 ```
 
+# New Supplement with fixed Rsp Counts
+
+```{r}
+dsRed_Points_SDMad <- normCounts_SDMad_RspOE_dsRed_SDMad_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMad_RspOE_dsRed_SDMad_Iso1_smRNA)) == TRUE,]
+dsRed_Points_SDMad <- data.frame(Group = c(rep("SDMad/Iso1", 3), rep("SDMad/RspOE", 3)),
+                              Count = as.numeric(dsRed_Points_SDMad[1,]))
+
+dsRed_Points_SD5 <- normCounts_SD5_RspOE_dsRed_SD5_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SD5_RspOE_dsRed_SD5_Iso1_smRNA)) == TRUE,]
+dsRed_Points_SD5 <- data.frame(Group = c(rep("SD5/Iso1", 3), rep("SD5/RspOE", 3)),
+                              Count = as.numeric(dsRed_Points_SD5[1,]))
+
+
+points <- bind_rows(
+  dsRed_Points_SDMad,
+  dsRed_Points_SD5
+)
+
+points$Pair <- rep(c("SDMad","SD5"),
+                   times = c(nrow(dsRed_Points_SDMad),
+                             nrow(dsRed_Points_SD5)))
+
+points$Pair <- factor(points$Pair, levels=c("SDMad","SD5"))
+points$Group <- factor(points$Group,
+                       levels=c("SDMad/Iso1","SDMad/RspOE",
+                                "SD5/Iso1","SD5/RspOE"))
+
+summary_df <- points |>
+  dplyr::group_by(Pair, Group) |>
+  dplyr::summarise(
+    Mean = mean(Count),
+    SD = sd(Count),
+    .groups="drop"
+  )
+
+summary_df$Group <- factor(summary_df$Group,
+                           levels = c("SDMad/Iso1","SDMad/RspOE",
+                                      "SD5/Iso1","SD5/RspOE"))
+
+points$Group <- factor(points$Group,
+                       levels = levels(summary_df$Group))
+
+summary_Mad <- summary_df[grepl("Mad", summary_df$Pair) == TRUE, ]
+summary_5 <- summary_df[grepl("SD5", summary_df$Pair) == TRUE, ]
+
+points_Mad <- points[grepl("Mad", points$Pair) == TRUE, ]
+points_5 <- points[grepl("SD5", points$Pair) == TRUE, ]
+
+ggplot(summary_Mad, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_Mad,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("seagreen","seagreen3")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("rspOE_dsRed_smRNACounts_SDMad_DESeq2.pdf", width = 6, height = 6, bg = "transparent")
+
+ggplot(summary_5, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_5,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("dodgerblue3","cornflowerblue")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("rspOE_dsRed_smRNACounts_SD5_DESeq2.pdf", width = 6, height = 6, bg = "transparent")
+```
+
 # Supplemental Figure 11C
 
 ```{r}
@@ -1029,3 +1532,204 @@ ggplot(data, aes(x = Genotype, y = kValues, fill = Genotype)) +
 
 ggsave("SD5_RspOEdsRED_cyoglaIII_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
 ```
+
+# Kip KD Panel A
+
+```{r}
+# KipKD K values: Iso1
+data <- data.frame(
+  White = c(0.992, 0.987, 0.995, 0.985, 0.981, 0.942, 0.989, 1, 0.983),
+  Kip = c(0.847, 0.928, 0.837, 0.858, 0.896, 0.943, 0.919, NA, NA)
+)
+
+long_data <- pivot_longer(data, cols = everything(), names_to = "shRNA", values_to = "K_Val")
+
+long_data$shRNA <- factor(long_data$shRNA, levels = c("White", "Kip"))
+
+ggplot(long_data, aes(x = shRNA, y = K_Val, fill = shRNA)) +
+  geom_boxplot(outlier.shape = 21, outlier.fill = "white", outlier.color = "black") +
+  scale_x_discrete(labels = c("White" = "White shRNA",
+                              "Kip" = "Kipferl shRNA")) +
+  scale_fill_manual(values = c("darkgrey", "seagreen")) +
+  scale_y_continuous(limits = c(0.5,1)) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.x = element_blank())
+
+ggsave("Iso1_Bam_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
+```
+
+# Kip KD Panel B
+
+```{r}
+# KipKD K values: C8
+data <- data.frame(
+  White = c(0.848,0.827,0.894,0.830,0.789,0.756,0.718,0.959,0.932,0.910),
+  Kip = c(0.784,0.596,0.569,0.729,0.840,0.713,0.808,0.723,0.706,NA)
+)
+
+long_data <- pivot_longer(data, cols = everything(), names_to = "shRNA", values_to = "K_Val")
+
+long_data$shRNA <- factor(long_data$shRNA, levels = c("White", "Kip"))
+
+ggplot(long_data, aes(x = shRNA, y = K_Val, fill = shRNA)) +
+  geom_boxplot(outlier.shape = 21, outlier.fill = "white", outlier.color = "black") +
+  scale_x_discrete(labels = c("White" = "White shRNA",
+                              "Kip" = "Kipferl shRNA")) +
+  scale_fill_manual(values = c("darkgrey", "seagreen")) +
+  scale_y_continuous(limits = c(0.5,1)) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.x = element_blank())
+
+ggsave("C8_Bam_Kvalue.pdf", width = 4, height = 4, units = c("in"), bg = "transparent")
+```
+
+```{r}
+FC_Points_FBgn0036294 <- normCounts_SDMad_SDRev_Iso1_DGE[grepl("FBgn0038196", rownames(normCounts_SDMad_SDRev_Iso1_DGE)) == TRUE,]
+FC_Points_FBgn0036294 <- data.frame(Group = c(rep("SDMadRev/Iso1", 3), rep("SDMad/Iso1", 3)),
+                              Count = as.numeric(FC_Points_FBgn0036294[1,]))
+
+FC_Points_SDRev <- normCounts_SDMadRev_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SDMadRev_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SDRev <- data.frame(Group = c(rep("SDRev/Iso1", 6), rep("R16/Iso1(REV)", 5)),
+                              Count = as.numeric(FC_Points_SDRev[1,]))
+
+FC_Points_SD5 <- normCounts_SD5_R16_Iso1_smRNA[grepl("Rsp", rownames(normCounts_SD5_R16_Iso1_smRNA)) == TRUE,]
+FC_Points_SD5 <- data.frame(Group = c(rep("R16/Iso1(SD5)", 3), rep("SD5/Iso1", 3)),
+                              Count = as.numeric(FC_Points_SD5[1,]))
+
+FC_Points_SDRev <- normCounts_SDMad_SDRev_Iso1_DGE[grepl("Rsp", rownames(normCounts_SDMad_SDRev_Iso1_DGE)) == TRUE,]
+FC_Points_SDRev <- data.frame(Group = c(rep("SDRev/Iso1", 6), rep("R16/Iso1(REV)", 5)),
+                              Count = as.numeric(FC_Points_SDRev[1,]))
+
+
+points <- bind_rows(
+  FC_Points_SDMad,
+  FC_Points_SDRev,
+  FC_Points_SD5
+)
+
+points$Pair <- rep(c("SDMad","SDRev","SD5"),
+                   times = c(nrow(FC_Points_SDMad),
+                             nrow(FC_Points_SDRev),
+                             nrow(FC_Points_SD5)))
+
+points$Pair <- factor(points$Pair, levels=c("SDMad","SDRev","SD5"))
+points$Group <- factor(points$Group,
+                       levels=c("R16/Iso1(MAD)","SDMad/Iso1",
+                                "R16/Iso1(REV)","SDRev/Iso1",
+                                "R16/Iso1(SD5)","SD5/Iso1"))
+
+summary_df <- points |>
+  dplyr::group_by(Pair, Group) |>
+  dplyr::summarise(
+    Mean = mean(Count),
+    SD = sd(Count),
+    .groups="drop"
+  )
+
+summary_df$Group <- factor(summary_df$Group,
+                           levels = c("R16/Iso1(MAD)","SDMad/Iso1",
+                                      "R16/Iso1(REV)","SDRev/Iso1",
+                                      "R16/Iso1(SD5)","SD5/Iso1"))
+
+points$Group <- factor(points$Group,
+                       levels = levels(summary_df$Group))
+
+summary_Mad <- summary_df[grepl("Mad", summary_df$Pair) == TRUE, ]
+summary_Rev <- summary_df[grepl("Rev", summary_df$Pair) == TRUE, ]
+summary_5 <- summary_df[grepl("SD5", summary_df$Pair) == TRUE, ]
+
+points_Mad <- points[grepl("Mad", points$Pair) == TRUE, ]
+points_Rev <- points[grepl("Rev", points$Pair) == TRUE, ]
+points_5 <- points[grepl("SD5", points$Pair) == TRUE, ]
+
+ggplot(summary_Mad, aes(x = Pair, y = Mean, fill = Group)) +
+  geom_bar(stat="identity",
+           position=position_dodge(width=0.6),
+           width=0.6) +
+  geom_errorbar(aes(ymin=Mean-SD, ymax=Mean+SD),
+                position=position_dodge(width=0.6),
+                width=0.15) +
+  geom_point(data=points_Mad,
+           aes(x=Pair, y=Count),
+           position=position_jitterdodge(
+             jitter.width=0.05,
+             dodge.width=0.6
+           ),
+           size=6,
+           color="black") +
+  scale_fill_manual(values=c("gray","seagreen")) +
+  theme_classic() +
+  theme(legend.position = "none", axis.text.x = element_text(size = 24), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 28), axis.title.y = element_text(size = 25))
+
+ggsave("smRNA_CPMPlot_SDMad_Iso1.pdf", width = 8, height = 6, units = c("in"), bg = "transparent")
+```
+
+# Supplemental Tables
+
+# Table S2
+
+```{r}
+HPsmRNA_SDMadvR16_Iso1 <- SDMad_R16_smRNA_Iso1[SDMad_R16_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPsmRNA_SDMadvR16_Iso1 <- data.frame(Genotype = c(rep("SD-Mad/Iso1", length(HPsmRNA_SDMadvR16_Iso1$Name))), HPsmRNA_SDMadvR16_Iso1)
+
+HPsmRNA_SDMadvR16_Gla <- SDMad_R16_smRNA_Gla[SDMad_R16_smRNA_Gla$Name %in% piRNALoci,1:5]
+HPsmRNA_SDMadvR16_Gla <- data.frame(Genotype = c(rep("SD-Mad/Gla", length(HPsmRNA_SDMadvR16_Gla$Name))), HPsmRNA_SDMadvR16_Gla)
+
+HPsmRNA_SD5vR16_Iso1 <- SD5_R16_smRNA_Iso1[SD5_R16_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPsmRNA_SD5vR16_Iso1 <- data.frame(Genotype = c(rep("SD-5/Iso1", length(HPsmRNA_SD5vR16_Iso1$Name))), HPsmRNA_SD5vR16_Iso1)
+
+HPsmRNA_SD5vR16_Gla <- SD5_R16_smRNA_Gla[SD5_R16_smRNA_Gla$Name %in% piRNALoci,1:5]
+HPsmRNA_SD5vR16_Gla <- data.frame(Genotype = c(rep("SD-5/Gla", length(HPsmRNA_SD5vR16_Gla$Name))), HPsmRNA_SD5vR16_Gla)
+
+HPsmRNA_SDMadRevvR16_Iso1 <- SDMadRev_R16_smRNA_Iso1[SDMadRev_R16_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPsmRNA_SDMadRevvR16_Iso1 <- data.frame(Genotype = c(rep("SD-MadRev/Iso1", length(HPsmRNA_SDMadRevvR16_Iso1$Name))), HPsmRNA_SDMadRevvR16_Iso1)
+
+HPsmRNA <- rbind(HPsmRNA_SDMadvR16_Iso1, HPsmRNA_SDMadvR16_Gla, HPsmRNA_SD5vR16_Iso1, HPsmRNA_SD5vR16_Gla, HPsmRNA_SDMadRevvR16_Iso1)
+
+write_tsv(HPsmRNA, "supplementalTables/TableS1.tsv")
+```
+
+# Table S3
+
+```{r}
+HPtotRNA_SDMadvR16_Iso1_Rep <- SDMad_R16_totRNA_Repeats_Iso1[SDMad_R16_totRNA_Repeats_Iso1$Name %in% piRNALoci,1:5]
+HPtotRNA_SDMadvR16_Iso1_Rep <- data.frame(Genotype = c(rep("SD-Mad/Iso1", length(HPtotRNA_SDMadvR16_Iso1_Rep$Name))), HPtotRNA_SDMadvR16_Iso1_Rep)
+
+HPtotRNA_SDMadvR16_Gla_Rep <- SDMad_R16_totRNA_Repeats_Gla[SDMad_R16_totRNA_Repeats_Gla$Name %in% piRNALoci,1:5]
+HPtotRNA_SDMadvR16_Gla_Rep <- data.frame(Genotype = c(rep("SD-Mad/Iso1", length(HPtotRNA_SDMadvR16_Gla_Rep$Name))), HPtotRNA_SDMadvR16_Gla_Rep)
+
+HPtotRNA_SD5vR16_Iso1_Rep <- SD5_R16_totRNA_Repeats_Iso1[SD5_R16_totRNA_Repeats_Iso1$Name %in% piRNALoci,1:5]
+HPtotRNA_SD5vR16_Iso1_Rep <- data.frame(Genotype = c(rep("SD-Mad/Iso1", length(HPtotRNA_SD5vR16_Iso1_Rep$Name))), HPtotRNA_SD5vR16_Iso1_Rep)
+
+HPtotRNA_SD5vR16_Gla_Rep <- SD5_R16_totRNA_Repeats_Gla[SD5_R16_totRNA_Repeats_Gla$Name %in% piRNALoci,1:5]
+HPtotRNA_SD5vR16_Gla_Rep <- data.frame(Genotype = c(rep("SD-Mad/Iso1", length(HPtotRNA_SD5vR16_Gla_Rep$Name))), HPtotRNA_SD5vR16_Gla_Rep)
+
+HPtotRNA_Rep <- rbind(HPtotRNA_SDMadvR16_Iso1_Rep, HPtotRNA_SDMadvR16_Gla_Rep, HPtotRNA_SD5vR16_Iso1_Rep, HPtotRNA_SD5vR16_Gla_Rep)
+
+HPtotRNA_Rep <- HPtotRNA_Rep %>% dplyr::arrange(Name)
+
+write_tsv(HPtotRNA_Rep, "supplementalTables/TableS2.tsv")
+```
+
+
+
+```{r}
+HPRspOEvsIso1_SDMad <- SDMad_RspOE_SDMad_smRNA_Iso1[SDMad_RspOE_SDMad_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPRspOEvsIso1_SDMad <- data.frame(Genotype = c(rep("SD-Mad/RspOE", length(HPRspOEvsIso1_SDMad$Name))), HPRspOEvsIso1_SDMad)
+
+HPRspOEdsRed_Iso1_SDMad <- SDMad_RspOE_dsRed_SDMad_smRNA_Iso1[SDMad_RspOE_dsRed_SDMad_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPRspOEdsRed_Iso1_SDMad <- data.frame(Genotype = c(rep("SD-Mad/RspOE-dsRed", length(HPRspOEdsRed_Iso1_SDMad$Name))), HPRspOEdsRed_Iso1_SDMad)
+
+HPRspOEvsIso1_SD5 <- SD5_RspOE_SD5_smRNA_Iso1[SD5_RspOE_SD5_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPRspOEvsIso1_SD5 <- data.frame(Genotype = c(rep("SD-Mad/RspOE", length(HPRspOEvsIso1_SD5$Name))), HPRspOEvsIso1_SD5)
+
+HPRspOEdsRed_Iso1_SD5 <- SD5_RspOE_dsRed_SD5_smRNA_Iso1[SD5_RspOE_dsRed_SD5_smRNA_Iso1$Name %in% piRNALoci,1:5]
+HPRspOEdsRed_Iso1_SD5 <- data.frame(Genotype = c(rep("SD-Mad/RspOE-dsRed", length(HPRspOEdsRed_Iso1_SD5$Name))), HPRspOEdsRed_Iso1_SD5)
+
+HPRspOE <- rbind(HPRspOEvsIso1_SDMad, HPRspOEdsRed_Iso1_SDMad, HPRspOEvsIso1_SD5, HPRspOEdsRed_Iso1_SD5)
+
+HPRspOE <- HPRspOE %>% dplyr::arrange(Name)
+
+write_tsv(HPsmRNA, "supplementalTables/TableS4.tsv")
+```
+
